@@ -3,6 +3,7 @@ request = require 'request'
 # coffee -e 'require("./lib/list.coffee").getrecentforvenue {foursquareid: "4e1cd66e18a8e423cd4fd37c"}, (cb) -> console.log cb'
 listlib = {
 	getrecentforvenue: (info, cb) ->
+		one_day_ago = (Math.round(Date.now() / 1000) - 86400)
 		if process.env.IGKEY != undefined
 			if info.foursquareid != undefined
 				url = "https://api.instagram.com/v1/locations/search?foursquare_v2_id=" + info.foursquareid + "&client_id=" + process.env.IGKEY
@@ -17,7 +18,7 @@ listlib = {
 							# we got location
 							location_id = json_resp.data[0].id
 							json_resp = {}
-							url = "https://api.instagram.com/v1/locations/" + location_id + "/media/recent?client_id=" + process.env.IGKEY
+							url = "https://api.instagram.com/v1/locations/" + location_id + "/media/recent?min_timestamp=" + one_day_ago.toString() + "&client_id=" + process.env.IGKEY
 							request {uri: url, timeout: 5000, method: 'GET'}, (error, response, body) ->
 								try
 									json_resp = JSON.parse(body)
