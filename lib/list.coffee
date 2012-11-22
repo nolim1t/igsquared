@@ -1,6 +1,6 @@
 request = require 'request'
 
-# coffee -e 'require("./lib/list.coffee").getrecentforvenue {foursquareid: "4e1cd66e18a8e423cd4fd37c"}, (cb) -> console.log cb'
+# coffee -e 'require("./lib/list.coffee").getrecentforvenue {foursquareid: "4adcda09f964a520dd3321e3"}, (cb) -> console.log cb'
 listlib = {
 	getrecentforvenue: (info, cb) ->
 		one_day_ago = (Math.round(Date.now() / 1000) - 86400)
@@ -29,7 +29,13 @@ listlib = {
 									list_of_media = json_resp.data
 									media_processed = []
 									for media in list_of_media
-										media_processed.push {mediaid: media.id, placename: media.location.name, tags: media.tags, caption: media.caption, created: media.created_time, user: media.user, likes: media.likes.count, comments: media.comments.count, hardlink: media.link, images: {thumbnail: media.images.thumbnail, normal: media.images.standard_resolution, crap: media.images.low_resolution}}
+										if media.caption != null
+											caption = media.caption
+											caption.textencoded = encodeURIComponent(caption.text)
+										else
+											caption = null
+
+										media_processed.push {mediaid: media.id, placename: media.location.name, tags: media.tags, caption: caption, created: media.created_time, user: media.user, likes: media.likes.count, comments: media.comments.count, hardlink: media.link, images: {thumbnail: media.images.thumbnail, normal: media.images.standard_resolution, crap: media.images.low_resolution}}
 									cb({status: true, media: media_processed, count: list_of_media.length})
 								else
 									cb({status: false, message: 'Error returned from instagram', info: body})
