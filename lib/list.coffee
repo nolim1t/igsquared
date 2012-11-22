@@ -29,7 +29,7 @@ listlib = {
 									list_of_media = json_resp.data
 									media_processed = []
 									for media in list_of_media
-										media_processed.push {created: media.created_time, user: media.user, likes: media.likes.count, comments: media.comments.count, hardlink: media.link, images: {thumbnail: media.images.thumbnail, normal: media.images.standard_resolution, crap: media.images.low_resolution}}
+										media_processed.push {mediaid: media.id, created: media.created_time, user: media.user, likes: media.likes.count, comments: media.comments.count, hardlink: media.link, images: {thumbnail: media.images.thumbnail, normal: media.images.standard_resolution, crap: media.images.low_resolution}}
 									cb({media: media_processed, count: list_of_media.length})
 								else
 									cb({status: false, message: 'Error returned from instagram', info: body})
