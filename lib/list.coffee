@@ -15,30 +15,35 @@ listlib = {
 							json_resp = {meta: {code: 500}}
 
 						if json_resp['meta']['code'] == 200
-							# we got location
-							location_id = json_resp.data[0].id
-							json_resp = {}
-							url = "https://api.instagram.com/v1/locations/" + location_id + "/media/recent?min_timestamp=" + one_day_ago.toString() + "&client_id=" + process.env.IGKEY
-							request {uri: url, timeout: 5000, method: 'GET'}, (error, response, body) ->
-								try
-									json_resp = JSON.parse(body)
-								catch e
-									json_resp = {meta: {code: 500}}
+							# Check if the response is empty
+							if JSON.stringify(json_resp.data) != "[]"
+								# we got location
+								location_id = json_resp.data[0].id
+								json_resp = {}
+								url = "https://api.instagram.com/v1/locations/" + location_id + "/media/recent?min_timestamp=" + one_day_ago.toString() + "&client_id=" + process.env.IGKEY
+								request {uri: url, timeout: 5000, method: 'GET'}, (error, response, body) ->
+									try
+										json_resp = JSON.parse(body)
+									catch e
+										json_resp = {meta: {code: 500}}
 
-								if json_resp['meta']['code'] == 200
-									list_of_media = json_resp.data
-									media_processed = []
-									for media in list_of_media
-										if media.caption != null
-											caption = media.caption
-											caption.textencoded = encodeURIComponent(caption.text)
-										else
-											caption = null
+									if json_resp['meta']['code'] == 200
+										list_of_media = json_resp.data
+										media_processed = []
+										for media in list_of_media
+											if media.caption != null
+												caption = media.caption
+												caption.textencoded = encodeURIComponent(caption.text)
+											else
+												caption = null
 
-										media_processed.push {mediaid: media.id, placename: media.location.name, tags: media.tags, caption: caption, created: media.created_time, user: media.user, likes: media.likes.count, comments: media.comments.count, hardlink: media.link, images: {thumbnail: media.images.thumbnail, normal: media.images.standard_resolution, crap: media.images.low_resolution}}
-									cb({status: true, media: media_processed, count: list_of_media.length})
-								else
-									cb({status: false, message: 'Error returned from instagram', info: body})
+											media_processed.push {mediaid: media.id, placename: media.location.name, tags: media.tags, caption: caption, created: media.created_time, user: media.user, likes: media.likes.count, comments: media.comments.count, hardlink: media.link, images: {thumbnail: media.images.thumbnail, normal: media.images.standard_resolution, crap: media.images.low_resolution}}
+										cb({status: true, media: media_processed, count: list_of_media.length})
+									else
+										cb({status: false, message: 'Error returned from instagram', info: body})
+							else
+								# Probably a new location so lets just return nothing
+								cb({status: true, media: [], count: 0})
 						else
 							cb({status: false, message: 'Error returned from instagram', info: body})
 					else
